@@ -3,17 +3,38 @@ import { useEffect, useState } from "react";
 
 import { copy, linkIcon, loader, tick } from "../assets";
 
-import { useGetSummaryMutation } from "../services/article";
+import {
+  useGetSummaryMutation,
+  useGetSummaryFromTextMutation,
+} from "../services/article";
 
 const Demo = () => {
   const [article, setArticle] = useState({
     url: "",
     summary: "",
+    text: "",
   });
 
   const [getSummary, { isLoading, isError, isSuccess }] =
     useGetSummaryMutation();
 
+  const [getSummaryFromText, textStatus] =
+    useGetSummaryFromTextMutation();
+
+  const handleTextSubmit = async (e) => {
+    e.preventDefault();
+    const postData = new URLSearchParams({
+      text: article.text,
+      percentage: "40",
+    });
+    const { data } = await getSummaryFromText(postData);
+
+    if (data?.summary) {
+      setArticle({ ...article, summary: data.summary });
+    }
+
+    console.log(data.summary);
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     const postData = new URLSearchParams({
@@ -60,7 +81,11 @@ const Demo = () => {
         </form>
         <h3 className="blue_gradient font-bold self-center text-xl">OR</h3>
 
-        <form action="" className="relative flex flex-col " onSubmit={() => {}}>
+        <form
+          action=""
+          className="relative flex flex-col "
+          onSubmit={handleTextSubmit}
+        >
           <div className="flex flex-row relative justify-center items-center">
             <img
               src={copy}
@@ -71,28 +96,29 @@ const Demo = () => {
             <textarea
               placeholder="Paste article text"
               className=" url_input w-full"
+              value={article.text}
+              onChange={(e) => {
+                setArticle({ ...article, text: e.target.value });
+              }}
+              required
             ></textarea>
           </div>
-          <button
-            type="Submit"
-            onClick={() => {}}
-            className="black_btn self-center my-5"
-          >
+          <button type="Submit" className="black_btn self-center my-5">
             Summarise
           </button>
         </form>
       </div>
 
       <div className="my-10 max-w-full flex justify-center items-center">
-        {isLoading ? (
+        {isLoading || textStatus.isLoading ? (
           <img
             src={loader}
             alt="loader"
             className="w-20 h-20 object-contain"
           ></img>
-        ) : isError ? (
+        ) : isError || textStatus.isError ? (
           <p className="font-inter font-bold text-black text-center">
-            Error {isError}
+            Error
           </p>
         ) : (
           article.summary && (

@@ -19,7 +19,12 @@ export const articleApi = createApi({
         return { url: `/summarizeFromUrl`, method: "POST", body };
       },
     }),
+    getSummaryFromText: builder.mutation({
+      query(body) {
+        return { url: `/summarizeFromText`, method: "POST", body };
+      },
+    }),
   }),
 });
 
-export const { useGetSummaryMutation } = articleApi;
+export const { useGetSummaryMutation,useGetSummaryFromTextMutation } = articleApi;
